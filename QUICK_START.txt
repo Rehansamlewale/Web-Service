@@ -1,0 +1,109 @@
+═══════════════════════════════════════════════════════════════
+  📱 WhatsApp Reminder Server - QUICK START
+  🆓 100% FREE - No Twilio, No Costs!
+═══════════════════════════════════════════════════════════════
+
+⚡ 3 STEPS TO GET STARTED:
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 1: Get Firebase Service Account Key                   │
+└─────────────────────────────────────────────────────────────┘
+
+1. Visit: https://console.firebase.google.com/project/rehanpro-6f322/settings/serviceaccounts/adminsdk
+
+2. Click "Generate new private key"
+
+3. Download the JSON file
+
+4. Rename it to: serviceAccountKey.json
+
+5. Move it to this folder (whatsapp-server)
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 2: Install & Run                                      │
+└─────────────────────────────────────────────────────────────┘
+
+Open PowerShell in this folder and run:
+
+    npm install
+    npm start
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 3: Scan QR Code                                       │
+└─────────────────────────────────────────────────────────────┘
+
+1. QR code will appear in terminal
+
+2. Open WhatsApp on your phone
+
+3. Go to: Settings → Linked Devices → Link a Device
+
+4. Scan the QR code
+
+5. Wait for "✅ WhatsApp client is ready!"
+
+
+═══════════════════════════════════════════════════════════════
+
+✅ DONE! Your server is now running!
+
+The server will:
+  • Check for reminders every minute
+  • Send WhatsApp messages automatically
+  • Update status in Firebase
+  • Work 24/7 as long as it's running
+
+═══════════════════════════════════════════════════════════════
+
+📝 TO TEST:
+
+1. Keep this server running
+
+2. Open your web app: http://localhost:3000
+
+3. Go to Reminders section
+
+4. Create a reminder for 2 minutes from now
+
+5. Wait for WhatsApp message! 📱
+
+═══════════════════════════════════════════════════════════════
+
+💡 KEEP IT RUNNING 24/7:
+
+Option 1: Use PM2 (Recommended)
+    npm install -g pm2
+    pm2 start server.js --name whatsapp-reminder
+    pm2 save
+
+Option 2: Deploy to VPS
+    DigitalOcean, Linode, AWS, etc. ($5/month)
+
+═══════════════════════════════════════════════════════════════
+
+🆘 TROUBLESHOOTING:
+
+Problem: "serviceAccountKey.json not found"
+Solution: Download it from Firebase Console (Step 1)
+
+Problem: "QR code not showing"
+Solution: Run "npm install" first, then "npm start"
+
+Problem: "WhatsApp disconnected"
+Solution: Restart the server with "npm start"
+
+═══════════════════════════════════════════════════════════════
+
+📚 MORE HELP:
+
+See README.md in this folder for detailed documentation
+
+═══════════════════════════════════════════════════════════════
+
+🎉 COST: ₹0 (Completely FREE!)
+
+No Twilio, no subscriptions, no hidden costs!
+
+═══════════════════════════════════════════════════════════════

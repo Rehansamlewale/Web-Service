@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# WhatsApp session data
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Firebase credentials
+serviceAccountKey.json
+serviceAccountKey.json.json
+*.json.json
+
+# Environment variables
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

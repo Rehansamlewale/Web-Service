@@ -51,13 +51,28 @@ admin.initializeApp(firebaseConfig);
 
 const db = admin.database();
 
-// Initialize WhatsApp Client
+// Initialize WhatsApp Client with Render-compatible puppeteer config
+const puppeteerConfig = {
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-accelerated-2d-canvas',
+    '--no-first-run',
+    '--no-zygote',
+    '--disable-gpu'
+  ]
+};
+
+// Use system Chromium if available (Docker/Render)
+if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+  puppeteerConfig.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+}
+
 const client = new Client({
   authStrategy: new LocalAuth(), // Saves session locally
-  puppeteer: {
-    headless: true,
-    args: ['--no-sandbox']
-  }
+  puppeteer: puppeteerConfig
 });
 
 // QR Code for first-time authentication

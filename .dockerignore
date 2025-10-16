@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+.wwebjs_auth
+.wwebjs_cache
+serviceAccountKey.json
+serviceAccountKey.json.json
+*.log
+.DS_Store
+Thumbs.db
+README.md
+DEPLOY_TO_RENDER.md
+PUSH_TO_GITHUB.md
+QUICK_START.txt
+ADD_ENV_VARIABLES.md

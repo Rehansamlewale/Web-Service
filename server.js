@@ -8,47 +8,75 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const admin = require('firebase-admin');
 require('dotenv').config();
+
 // Initialize Firebase Admin
 console.log('🔧 Initializing Firebase...');
 
-// Check for required environment variables
-const requiredVars = [
-  'FIREBASE_TYPE',
-  'FIREBASE_PROJECT_ID',
-  'FIREBASE_PRIVATE_KEY',
-  'FIREBASE_PRIVATE_KEY_ID',
-  'FIREBASE_CLIENT_EMAIL',
-  'FIREBASE_CLIENT_ID',
-  'FIREBASE_CLIENT_CERT_URL',
-  'FIREBASE_DATABASE_URL'
-];
+// Try environment variables first, then fall back to service account file
+let firebaseConfig;
 
-const missingVars = requiredVars.filter(varName => !process.env[varName]);
+// Check if we're in production (Render sets NODE_ENV=production)
+const isProduction = process.env.NODE_ENV === 'production';
 
-if (missingVars.length > 0) {
-  console.error('❌ Error: Missing required Firebase environment variables:');
-  missingVars.forEach(varName => console.error(` - ${varName}`));
-  console.error('\nPlease set all required Firebase environment variables in Render dashboard');
-  process.exit(1);
+if (isProduction) {
+  console.log('🔧 Running in production mode');
+  // In production, require all environment variables
+  const requiredVars = [
+    'FIREBASE_TYPE',
+    'FIREBASE_PROJECT_ID',
+    'FIREBASE_PRIVATE_KEY',
+    'FIREBASE_PRIVATE_KEY_ID',
+    'FIREBASE_CLIENT_EMAIL',
+    'FIREBASE_CLIENT_ID',
+    'FIREBASE_CLIENT_CERT_URL',
+    'FIREBASE_DATABASE_URL'
+  ];
+
+  const missingVars = requiredVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.error('❌ Error: Missing required Firebase environment variables:');
+    missingVars.forEach(varName => console.error(` - ${varName}`));
+    console.error('\nPlease set all required Firebase environment variables in Render dashboard');
+    process.exit(1);
+  }
+
+  firebaseConfig = {
+    credential: admin.credential.cert({
+      type: process.env.FIREBASE_TYPE,
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: process.env.FIREBASE_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
+      token_uri: process.env.FIREBASE_TOKEN_URI || 'https://oauth2.googleapis.com/token',
+      auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
+      client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
+    }),
+    databaseURL: process.env.FIREBASE_DATABASE_URL
+  };
+} else {
+  // In development, try to use service account file
+  console.log('🔧 Running in development mode');
+  console.log('🔧 Attempting to use serviceAccountKey.json');
+  try {
+    const serviceAccount = require('./serviceAccountKey.json');
+    firebaseConfig = {
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://rehanpro-6f322-default-rtdb.firebaseio.com"
+    };
+    console.log('✅ Using local service account file');
+  } catch (error) {
+    console.error('❌ Error: serviceAccountKey.json not found!');
+    console.error('Please either:');
+    console.error('1. Create a serviceAccountKey.json file in the project root, or');
+    console.error('2. Set all required Firebase environment variables');
+    process.exit(1);
+  }
 }
 
-// Initialize Firebase with environment variables
-const firebaseConfig = {
-  credential: admin.credential.cert({
-    type: process.env.FIREBASE_TYPE,
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\\\n/g, '\\n'),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-    client_id: process.env.FIREBASE_CLIENT_ID,
-    auth_uri: process.env.FIREBASE_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
-    token_uri: process.env.FIREBASE_TOKEN_URI || 'https://oauth2.googleapis.com/token',
-    auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
-    client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
-  }),
-  databaseURL: process.env.FIREBASE_DATABASE_URL
-};
-
+// Initialize Firebase
 try {
   admin.initializeApp(firebaseConfig);
   console.log('✅ Firebase initialized successfully');

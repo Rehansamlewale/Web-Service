@@ -8,49 +8,56 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const admin = require('firebase-admin');
 require('dotenv').config();
-
 // Initialize Firebase Admin
-// Supports both environment variables (production) and service account file (local)
-let firebaseConfig;
+console.log('🔧 Initializing Firebase...');
 
-if (process.env.FIREBASE_PRIVATE_KEY) {
-  // Use environment variables (Render/production deployment)
-  console.log('🔧 Using Firebase credentials from environment variables');
-  firebaseConfig = {
-    credential: admin.credential.cert({
-      type: process.env.FIREBASE_TYPE || 'service_account',
-      project_id: process.env.FIREBASE_PROJECT_ID,
-      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      client_email: process.env.FIREBASE_CLIENT_EMAIL,
-      client_id: process.env.FIREBASE_CLIENT_ID,
-      auth_uri: process.env.FIREBASE_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
-      token_uri: process.env.FIREBASE_TOKEN_URI || 'https://oauth2.googleapis.com/token',
-      auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
-      client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
-    }),
-    databaseURL: process.env.FIREBASE_DATABASE_URL || "https://rehanpro-6f322-default-rtdb.firebaseio.com"
-  };
-} else {
-  // Use service account file (local development)
-  console.log('🔧 Using Firebase credentials from serviceAccountKey.json');
-  try {
-    const serviceAccount = require('./serviceAccountKey.json');
-    firebaseConfig = {
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: "https://rehanpro-6f322-default-rtdb.firebaseio.com"
-    };
-  } catch (error) {
-    console.error('❌ Error: serviceAccountKey.json not found!');
-    console.error('Please download it from Firebase Console or set environment variables.');
-    process.exit(1);
-  }
+// Check for required environment variables
+const requiredVars = [
+  'FIREBASE_TYPE',
+  'FIREBASE_PROJECT_ID',
+  'FIREBASE_PRIVATE_KEY',
+  'FIREBASE_PRIVATE_KEY_ID',
+  'FIREBASE_CLIENT_EMAIL',
+  'FIREBASE_CLIENT_ID',
+  'FIREBASE_CLIENT_CERT_URL',
+  'FIREBASE_DATABASE_URL'
+];
+
+const missingVars = requiredVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ Error: Missing required Firebase environment variables:');
+  missingVars.forEach(varName => console.error(` - ${varName}`));
+  console.error('\nPlease set all required Firebase environment variables in Render dashboard');
+  process.exit(1);
 }
 
-admin.initializeApp(firebaseConfig);
+// Initialize Firebase with environment variables
+const firebaseConfig = {
+  credential: admin.credential.cert({
+    type: process.env.FIREBASE_TYPE,
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\\\n/g, '\\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: process.env.FIREBASE_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: process.env.FIREBASE_TOKEN_URI || 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
+  }),
+  databaseURL: process.env.FIREBASE_DATABASE_URL
+};
+
+try {
+  admin.initializeApp(firebaseConfig);
+  console.log('✅ Firebase initialized successfully');
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error.message);
+  process.exit(1);
+}
 
 const db = admin.database();
-
 // Initialize WhatsApp Client with Render-compatible puppeteer config
 const puppeteerConfig = {
   headless: true,
